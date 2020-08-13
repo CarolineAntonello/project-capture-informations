@@ -11,25 +11,26 @@ import org.apache.pdfbox.util.PDFTextStripper;
 public class ConverterPdfInTxt {  
   
     public String CapturePdf(String pdfFile) {  
-        try {  
+        try 
+        {  
         	
             File filePDF = new File(pdfFile);  
             FileInputStream fileInputStream = new FileInputStream(filePDF); 
             PDFTextStripper stripper = new PDFTextStripper();  
   
             PDDocument pdfDocument = null;  
-            try {  
+            try 
+            {  
+            	
                 PDFParser parser = new PDFParser(fileInputStream);  
                 parser.parse();  
                 pdfDocument = parser.getPDDocument();  
                 pdfFile = stripper.getText(pdfDocument); 
-  
-                info("Arquivo PDF: ");  
-                info("");  
-                info(pdfFile); 
-                
+            
                 return pdfFile;
-            } finally {  
+                
+            } finally 
+            {  
                 if (pdfDocument != null) 
                 {  
                     try 
@@ -39,27 +40,16 @@ public class ConverterPdfInTxt {
                     } catch (IOException e) {}  
                 }  
             }  
-        } catch (Exception e) {  
+        } catch (Exception e) 
+        {  
             error(e.toString());  
         }
         
         return pdfFile;
     }  
   
-    /** 
-     * Log Info. 
-     * @param log 
-     */  
-    private static void info(String log) {  
-        System.out.println("INFO: " + log);  
-    }  
-  
-    /** 
-     * Log Error. 
-     * @param log 
-     */  
-    private static void error(String log) {  
+    private static void error(String log) 
+    {  
         System.out.println("ERROR: " + log);  
-    }  
-  
+    }                                   
 }  

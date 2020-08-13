@@ -1,41 +1,73 @@
 package br.com.capture.information.services;
 
-import java.io.BufferedInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.io.File;
 
-public class ServicesFactory {
+import br.com.capture.information.Util.ConverterPdfInTxt;
+import br.com.capture.informations.vo.AddressVO;
+import br.com.capture.informations.vo.CandidateVO;
+import br.com.capture.informations.vo.FormVO;
+
+public class ServicesFactory implements Runnable {
 	
-	public void FillFormByPdfText(String fileText) {
-		
-		String[] linhas = fileText.toString().split("\\r?\\n");
-		System.out.println("INFO: " + linhas[0]); 
-		
+	String directory;
+	
+	public ServicesFactory(String _directory) {
+		this.directory = _directory;
 	}
 	
-	public void SaveFilesDonwload(final String filename, final String urlString) throws MalformedURLException, IOException 
-	{
-        BufferedInputStream in = null;
-        FileOutputStream fout = null;
-        try {
-            in = new BufferedInputStream(new URL(urlString).openStream());
-            fout = new FileOutputStream(filename);
+	@Override
+	public void run() {
+		ConverterPdfInTxt convertPdf = new ConverterPdfInTxt();
+		
+		File folder = new File(directory);
+		File[] listOfFiles = folder.listFiles();
 
-            final byte data[] = new byte[1024];
-            int count;
-            while ((count = in.read(data, 0, 1024)) != -1) {
-                fout.write(data, 0, count);
-            }
-        } finally {
-            if (in != null) {
-                in.close();
-            }
-            if (fout != null) {
-                fout.close();
+		if(listOfFiles != null) {
+			for (File file : listOfFiles) 
+			{
+			    if (file.isFile()) 
+			    {
+			    	String receivePdf = convertPdf.CapturePdf(directory + file.getName());
+			    	FillFormByPdfText(receivePdf);
+			    }
+			}
+		}
+	}
+	
+	public void FillFormByPdfText(String fileText) 
+	{
+		FormVO form = new FormVO();
+		form.Address = new AddressVO();
+		form.Candidate = new CandidateVO();
+		
+		String[] linhas = fileText.toString().split("\\r?\\n");
+		
+		form.Title = linhas[5];
+		form.Address.City = linhas[1];
+		form.Address.State = linhas[0];
+		form.Email = FindStringInArray(linhas[9], "@");
+		form.Candidate.Documents = linhas[12];
+		form.Notice = FindStringInArray(linhas[13], "–");
+		form.Candidate.Name = FindStringInArray(linhas[15], " ");
+		form.Candidate.Classification = FindStringInArray(linhas[15], "º");
+		
+		info(fileText);
+		info("");
+	}
+	
+	private String FindStringInArray(String string, String caracter) 
+	{
+		String[] listString = string.split(" ");
+		String out = null;
+		for (String stringReceived : listString) {
+            if(stringReceived.contains(caracter)) {
+                out = stringReceived;
             }
         }
+		return out;
+	}
+	
+    private static void info(String log) {  
+        System.out.println("INFO: " + log);  
     }
-
 }
